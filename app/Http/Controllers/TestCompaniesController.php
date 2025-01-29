@@ -15,7 +15,6 @@ class TestCompaniesController extends Controller
 
     public function show(Request $request)
     {
-        // return response()->json(TestCompanies::all());
         return response()->json(TestCompanies::select('name', 'adress', 'phone')->get());
     }
 

@@ -17,5 +17,5 @@ Route::post('/storecompanies', [TestCompaniesController::class, 'store'])->name(
 Route::middleware('auth:sanctum')->get('/getcompanies', [TestCompaniesController::class, 'show'])->name('companies.show');
 
 //LEVEL 5 (a & b)
-Route::get('/user/{user_id}/events', [EventController::class, 'getUserEvents']);
-Route::get('/event/{event_id}/details', [EventController::class, 'getEventDetails']);
+Route::get('/user/{userId}/events', [EventController::class, 'getUserEvents']);
+Route::get('/event/{userId}/details', [EventController::class, 'getUserEventsTopicsLessonsInstructors']);
