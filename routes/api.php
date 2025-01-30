@@ -3,8 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Models\TestCompanies;
-
 use App\Http\Controllers\LoginUserController;
 use App\Http\Controllers\TestCompaniesController; 
 use App\Http\Controllers\EventController;
