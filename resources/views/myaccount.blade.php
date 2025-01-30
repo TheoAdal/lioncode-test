@@ -6,7 +6,7 @@
     <title>My Account</title>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const token = "{{ $token }}"; // Λαμβάνουμε το API token από το Blade
+            const token = "{{ $token }}"; //taking the token to get the the companies
 
             fetch("{{ route('companies.show') }}", {
                 method: "GET",

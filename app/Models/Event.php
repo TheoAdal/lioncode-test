@@ -17,7 +17,7 @@ class Event extends Model
 
     public function topics()
     {
-        //an event can have multiple topics
+        //an event can have many topics
         return $this->belongsToMany(Topic::class, 'event_topic_lesson_instructor', 'event_id', 'topic_id')
                     ->with(['lessons', 'instructors']);
     }

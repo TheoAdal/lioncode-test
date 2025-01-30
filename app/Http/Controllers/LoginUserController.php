@@ -24,10 +24,8 @@ class LoginUserController extends Controller
             'password' => 'required',
         ]);
     
-        
-        
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate(); // Regenerate session ID to prevent session fixation attacks
+            $request->session()->regenerate(); 
     
             //create token
             $token = Auth::user()->createToken('my-api-token')->plainTextToken;
@@ -47,13 +45,14 @@ class LoginUserController extends Controller
 
         // return response()->json(['message' => 'Successfully logged out!!!!', 
         //                                 'message2' => 'Token deleted']);
+
         $request->user()->tokens()->delete();  
 
-    // Invalidate the session
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+        //end the sess
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    return redirect('/login'); // Redirect to the welcome page
+        return redirect('/login'); //redirect to login
     }
 }
