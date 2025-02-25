@@ -35,63 +35,35 @@ class EventController extends Controller
     // β) Δεύτερο βήμα σε κάθε event της πάνω κλήσης θέλουμε τα TOPICS με τα αντίστοιχα LESSONS και τους αντίστοιχους INSTRUCTORS. (πληροφορία event_topic_lesson_instructor).
     public function getUserEventsTopicsLessonsInstructors($userId)
     {
-        // Log::info("Fetching events for user ID: {$userId}");
-
-        //find user->event->topics->lessons->instructors
         $user = User::with([
-            'events' => function ($query) {
-                $query->with([
-                    'topics' => function ($topicQuery) {
-                        $topicQuery->with([
-                            'lessons' => function ($lessonQuery) {
-                                $lessonQuery->select('lessons.id')->distinct();
-                            },
-                            'instructors' => function ($instructorQuery) {
-                                $instructorQuery->select('instructors.id')->distinct();
-                            }
-                        ]);
-                    }
-                ]);
-            }
+            'events.eventTopics.lesson.instructor'
         ])->find($userId);
-
-        //no user response
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-        //response structure
-        $response = [
-            'user' => [
-                'User_id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
+        
+        return response()->json([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
             'events' => $user->events->map(function ($event) {
                 return [
-                    'Event_id' => $event->id,
-                    'topics' => $event->topics->map(function ($topic) {
+                    'event_id' => $event->id,
+                    'topics' => $event->topics->groupBy('id')->map(function ($lessons, $topicId) {
                         return [
-                            'Topic_id' => $topic->id,
-                            'lessons' => $topic->lessons->map(function ($lesson) {
-                                return [
-                                    'Lesson_id' => $lesson->id,
-                                ];
-                            }),
-                            'instructors' => $topic->instructors->map(function ($instructor) {
-                                return [
-                                    'Instructors_id' => $instructor->id,
-                                ];
-                            }),
+                            'topic_id' => $topicId,
+                            'lessons' => $lessons->flatMap(function ($topic) {
+                                return $topic->lessons->map(function ($lesson) {
+                                    return [
+                                        'lesson_id' => $lesson->id,
+                                        'instructor' => [
+                                            'instructor_id' => optional($lesson->instructor)->id
+                                        ]
+                                    ];
+                                });
+                            })->values()
                         ];
-                    }),
+                    })->values()
                 ];
-            }),
-        ];
-
-        // Log::info("Fetched " . $user->events->count() . " events for user ID: {$userId}");
-
-        return response()->json($response, 200);
+            })
+        ]);
     }
 
 }

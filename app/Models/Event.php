@@ -12,13 +12,56 @@ class Event extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'event_user');
+        return $this->belongsToMany(User::class, 'event_user', 'event_id', 'user_id');
+    }
+
+    public function eventTopics()
+    {
+        return $this->hasMany(EventTopicLessonInstructor::class, 'event_id');
     }
 
     public function topics()
     {
-        //an event can have many topics
-        return $this->belongsToMany(Topic::class, 'event_topic_lesson_instructor', 'event_id', 'topic_id')
-                    ->with(['lessons', 'instructors']);
+        return $this->hasManyThrough(
+            Topic::class,
+            EventTopicLessonInstructor::class,
+            'event_id',
+            'id',
+            'id',
+            'topic_id'
+        );
     }
+
+    // public function lessons()
+    // {
+    //     return $this->hasManyThrough(
+    //         Lesson::class,
+    //         EventTopicLessonInstructor::class,
+    //         'event_id',
+    //         'id',
+    //         'id',
+    //         'lesson_id'
+    //     );
+    // }
+
+    // public function instructors()
+    // {
+    //     return $this->hasManyThrough(
+    //         Instructor::class,
+    //         EventTopicLessonInstructor::class,
+    //         'event_id',
+    //         'id',
+    //         'id',
+    //         'instructor_id'
+    //     );
+    // }
+
+/////////////////////////////////////
+
+    // public function topics()
+    // {   /**
+    //     * The topics that belong to the event. 
+    //     */
+    //     return $this->belongsToMany(Topic::class, 'event_topic_lesson_instructor', 'event_id',  'topic_id');
+    // }
 }
