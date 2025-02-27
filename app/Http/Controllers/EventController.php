@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 use App\Models\User;
+use App\Models\EventTopicLessonInstructor;
 
 class EventController extends Controller
 {
@@ -35,35 +36,58 @@ class EventController extends Controller
     // β) Δεύτερο βήμα σε κάθε event της πάνω κλήσης θέλουμε τα TOPICS με τα αντίστοιχα LESSONS και τους αντίστοιχους INSTRUCTORS. (πληροφορία event_topic_lesson_instructor).
     public function getUserEventsTopicsLessonsInstructors($userId)
     {
-        $user = User::with([
-            'events.eventTopics.lesson.instructor'
-        ])->find($userId);
+        $user = User::findOrFail($userId);
+    
+    $result = [
+        'user_id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'events' => []
+    ];
+    
+    // Get all the user's events
+    $events = $user->events;
+    \Log::info('User events: ' . $events->pluck('id')->implode(', '));
+    
+    foreach ($events as $event) {
+        $eventData = [
+            'event_id' => $event->id,
+            'topics' => []
+        ];
         
-        return response()->json([
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'events' => $user->events->map(function ($event) {
-                return [
-                    'event_id' => $event->id,
-                    'topics' => $event->topics->groupBy('id')->map(function ($lessons, $topicId) {
-                        return [
-                            'topic_id' => $topicId,
-                            'lessons' => $lessons->flatMap(function ($topic) {
-                                return $topic->lessons->map(function ($lesson) {
-                                    return [
-                                        'lesson_id' => $lesson->id,
-                                        'instructor' => [
-                                            'instructor_id' => optional($lesson->instructor)->id
-                                        ]
-                                    ];
-                                });
-                            })->values()
-                        ];
-                    })->values()
+        // Get the event-topic-lesson-instructor records for this event
+        $etliRecords = EventTopicLessonInstructor::where('event_id', $event->id)
+            ->get()
+            ->groupBy('topic_id');
+        
+        foreach ($etliRecords as $topicId => $records) {
+            $topicData = [
+                'topic_id' => $topicId,
+                'lessons' => []
+            ];
+            
+            // Group records by lesson
+            $lessonGroups = $records->groupBy('lesson_id');
+            
+            foreach ($lessonGroups as $lessonId => $lessonRecords) {
+                // Get the first record for this lesson (assuming one instructor per lesson)
+                $firstRecord = $lessonRecords->first();
+                
+                $topicData['lessons'][] = [
+                    'lesson_id' => $lessonId,
+                    'instructor' => [
+                        'instructor_id' => $firstRecord->instructor_id
+                    ]
                 ];
-            })
-        ]);
+            }
+            
+            $eventData['topics'][] = $topicData;
+        }
+        
+        $result['events'][] = $eventData;
+    }
+    
+    return response()->json($result);
     }
 
 }

@@ -8,15 +8,21 @@ class Lesson extends Model
 {
     protected $table = 'lessons';
 
-    public function instructor()
+    public function eventTopicLessonInstructors()
     {
-        return $this->belongsTo(Instructor::class, 'instructor_id');
+        return $this->hasMany(EventTopicLessonInstructor::class);
     }
-//////////////////////////////////////////////
-
-    // public function instructors()
-    // {
-    //     return $this->belongsToMany(Instructor::class, 'event_topic_lesson_instructor', 
-    //     'topic_id', 'instructor_id');
-    // }
+    
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class, 'event_topic_lesson_instructor', 'lesson_id', 'topic_id')
+                    ->distinct();
+    }
+    
+    public function instructors()
+    {
+        return $this->belongsToMany(Instructor::class, 'event_topic_lesson_instructor', 'lesson_id', 'instructor_id')
+                    ->distinct();
+    }
+    
 }

@@ -10,58 +10,30 @@ class Event extends Model
     use HasFactory;
     protected $table = 'events';
 
-    public function users()
+    public function user()
     {
         return $this->belongsToMany(User::class, 'event_user', 'event_id', 'user_id');
     }
 
-    public function eventTopics()
+    public function eventTopicLessonInstructors()
     {
-        return $this->hasMany(EventTopicLessonInstructor::class, 'event_id');
+        return $this->hasMany(EventTopicLessonInstructor::class);
     }
 
     public function topics()
     {
-        return $this->hasManyThrough(
-            Topic::class,
-            EventTopicLessonInstructor::class,
-            'event_id',
-            'id',
-            'id',
-            'topic_id'
-        );
+        return $this->belongsToMany(Topic::class, 'event_topic_lesson_instructor')
+                    ->distinct();
     }
 
-    // public function lessons()
-    // {
-    //     return $this->hasManyThrough(
-    //         Lesson::class,
-    //         EventTopicLessonInstructor::class,
-    //         'event_id',
-    //         'id',
-    //         'id',
-    //         'lesson_id'
-    //     );
-    // }
+    public function lessons()
+    {
+        return $this->hasMany(EventTopicLessonInstructor::class, 'event_id')->with('lesson');
+    }
 
-    // public function instructors()
-    // {
-    //     return $this->hasManyThrough(
-    //         Instructor::class,
-    //         EventTopicLessonInstructor::class,
-    //         'event_id',
-    //         'id',
-    //         'id',
-    //         'instructor_id'
-    //     );
-    // }
+    public function instructors()
+    {
+        return $this->hasMany(EventTopicLessonInstructor::class, 'event_id')->select('instructor_id')->distinct();
+    }
 
-/////////////////////////////////////
-
-    // public function topics()
-    // {   /**
-    //     * The topics that belong to the event. 
-    //     */
-    //     return $this->belongsToMany(Topic::class, 'event_topic_lesson_instructor', 'event_id',  'topic_id');
-    // }
 }

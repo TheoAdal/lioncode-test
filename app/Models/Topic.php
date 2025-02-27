@@ -11,32 +11,22 @@ class Topic extends Model
 
     protected $table = 'topics';
 
+    public function eventTopicLessonInstructors()
+    {
+        return $this->hasMany(EventTopicLessonInstructor::class);
+    }
+    
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'event_topic_lesson_instructor')
+                    ->distinct();
+    }
+    
     public function lessons()
     {
-        return $this->hasManyThrough(
-            Lesson::class,
-            EventTopicLessonInstructor::class,
-            'topic_id',
-            'id',
-            'id',
-            'lesson_id'
-        );
+        return $this->belongsToMany(Lesson::class, 'event_topic_lesson_instructor', 'topic_id', 'lesson_id')
+                    ->distinct();
     }
-
-////////////////////////////////////
-    // public function instructors()
-    // {
-    //     return $this->belongsToMany(Instructor::class, 'event_topic_lesson_instructor', 
-    //     'topic_id', 'instructor_id');
-    // }
-
-    // public function lessons()
-    // {   /**
-    //     * The lessons that belong to the topic.
-    //     */
-    //     return $this->belongsToMany(Lesson::class, 'event_topic_lesson_instructor', 
-    //     'topic_id', 'lesson_id');
-    // }
 
 }
 
